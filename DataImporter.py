@@ -21,6 +21,27 @@ import glob
 import csv
 import datetime
 
+# Connect to MySQL
+connection = mysql.connector.connect(
+    user='root', password='123456', host='localhost')
+cursor = connection.cursor()
+
+# map for player id's
+player_id = map(name, )
+# map for match id's
+
+# map for tourney id's
+
+# sample query_string from hw1:
+# Insert values into VOTES table
+
+
+def insertVote(id, name, country, hand, height):
+    query_string = "INSERT INTO player VALUES (%s, %s, %s, %s, %s)"
+    cursor.execute(query_string, (congress_number,
+                   congress_session, vote_year, vote_date, vote_number))  # check execute statement!
+
+
 # for all the files in the csv directory
 directory = 'tennis_atp-master'
 for filename in os.listdir(directory):
