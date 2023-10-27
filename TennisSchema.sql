@@ -14,12 +14,10 @@ CREATE TABLE player
 
 DROP TABLE IF EXISTS tournament;
 CREATE TABLE tournament
-	(id				VARCHAR(2),
-	 name			VARCHAR(2),
-	 tourn_evel		NUMERIC(2),
-	 location		VARCHAR(2),
+	(id				VARCHAR(12),
+	 name			VARCHAR(20),
+	 tourn_level	VARCHAR(3),
 	 tourn_date		DATE,
-	 winner			VARCHAR(2),
 	 PRIMARY KEY (id)
 	);
 
@@ -38,7 +36,7 @@ DROP TABLE IF EXISTS plays;
 CREATE TABLE plays
 	(match_num		VARCHAR(1),
 	 player_id		MEDIUMINT,
-	 winorlose		VARCHAR(1),
+	 win_or_lose	VARCHAR(1),
 	 ace			NUMERIC(1),
 	 df				NUMERIC(1),
 	 fstIn			NUMERIC(1),
