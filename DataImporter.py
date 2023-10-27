@@ -85,33 +85,48 @@ tourney_id = set()
 
 
 def insertPlayer(name, country, hand, height):
-    query_string = "INSERT INTO player VALUES (%s, %s, %s, %s)"
+    query_string = "INSERT INTO player(name, country, hand, height) VALUES (%s, %s, %s, %s)"
+    if name == '':
+        name = None
+    if country == '':
+        country = None
+    if hand == '':
+        hand = None
+    if height == '':
+        height = None
+
     # check execute statement!
     cursor.execute(query_string, (name, country, hand, height))
 
 
+longestname = 0
 # for all the files in the csv directory
 for filename in glob.glob("tennis_atp-master/*.csv"):
-    print('hi')
     file = open(filename)
     csvreader = csv.reader(file)
+    i = 0
     for row in csvreader:
-        # figure out which columns to select for which tables and what attributes for Player
-        winner_name = row[WINNER_NAME]
-        winner_height = row[WINNER_HT]
-        playerArray = (winner_name, winner_height)
-        if (playerArray not in player_id):
-            insertPlayer(row[WINNER_NAME], row[WINNER_IOC],
-                         row[WINNER_HAND], row[WINNER_HT])
-            player_id.add(playerArray)
-        loser_name = row[LOSER_NAME]
-        loser_height = row[LOSER_HT]
-        playerArray = [loser_name, loser_height]
-        if(playerArray not in player_id):
-            insertPlayer(row[LOSER_NAME], row[LOSER_IOC],
-                         row[LOSER_HAND], row[LOSER_HT])
-
+        if i != 0:
+            # figure out which columns to select for which tables and what attributes for Player
+            winner_name = row[WINNER_NAME]
+            winner_height = row[WINNER_HT]
+            playerList = (winner_name, winner_height)
+            if (playerList not in player_id):
+                insertPlayer(row[WINNER_NAME], row[WINNER_IOC],
+                             row[WINNER_HAND], row[WINNER_HT])
+                player_id.add(playerList)
+            loser_name = row[LOSER_NAME]
+            loser_height = row[LOSER_HT]
+            playerList = (loser_name, loser_height)
+            if(playerList not in player_id):
+                insertPlayer(row[LOSER_NAME], row[LOSER_IOC],
+                             row[LOSER_HAND], row[LOSER_HT])
+                player_id.add(playerList)
+        i += 1
+    connection.commit()
     file.close()
+cursor.close()
+
 
 # # to print first line of csv
 # file = open('tennis_atp-master/atp_matches_1968.csv')
