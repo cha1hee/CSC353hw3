@@ -77,26 +77,24 @@ connection = mysql.connector.connect(
     user='root', password='123456', host='localhost', database='tennishw3')
 cursor = connection.cursor()
 
-# map for player id's
+# dictionaries to store new IDs for each entity
 players = {}
-# map for match id's
 matches = {}
-# map for tourney id's
 tourneys = {}
 
 
 def convertDate(date):
     year = date[0:4]
     month = calendar.month_name[int(date[4:6])] + ' '
-    dateDay = date[6:8] + ' '
-    day = month + dateDay + year
-    return datetime.datetime.strptime(day, '%B %d %Y').strftime('%Y-%m-%d')
+    day = date[6:8] + ' '
+    formatted_date = month + day + year
+    return datetime.datetime.strptime(formatted_date, '%B %d %Y').strftime('%Y-%m-%d')
 
 
-def createID(strHint, key, mapID):
-    idNum = len(mapID)+1
-    mapID[key] = strHint + str(idNum)
-    return strHint + str(idNum)
+def createID(entity_first_letter, key, entity_ids_map):
+    new_id = len(entity_ids_map) + 1
+    entity_ids_map[key] = entity_first_letter + str(new_id)
+    return entity_first_letter + str(new_id)
 
 
 def insertPlayer(id, name, country, hand, height):
@@ -109,6 +107,9 @@ def insertPlayer(id, name, country, hand, height):
         hand = None
     if height == '':
         height = None
+
+    # print("player ", id, name, country, hand, height)
+
     cursor.execute(query_string, (id, name, country, hand, height))
 
 
@@ -122,6 +123,8 @@ def insertTourney(id, name, level, date):
         date = None
     else:
         date = convertDate(date)
+
+    # print("tourney ", id, name, level, date)
     cursor.execute(query_string, (id, name, level, date))
 
 
@@ -171,14 +174,14 @@ for filename in glob.glob("tennis_atp-master/*.csv"):
             winner_height = row[WINNER_HT]
             winner_key = (winner_name, winner_height)
             if (winner_key not in players):
-                winner_id = createID('p', winner_key, players)
+                winner_id = createID('P', winner_key, players)
                 insertPlayer(winner_id, row[WINNER_NAME], row[WINNER_IOC],
                              row[WINNER_HAND], row[WINNER_HT])
             loser_name = row[LOSER_NAME]
             loser_height = row[LOSER_HT]
             loser_key = (loser_name, loser_height)
             if(loser_key not in players):
-                loser_id = createID('p', loser_key, players)
+                loser_id = createID('P', loser_key, players)
                 insertPlayer(loser_id, row[LOSER_NAME], row[LOSER_IOC],
                              row[LOSER_HAND], row[LOSER_HT])
             # Tourney
@@ -186,13 +189,13 @@ for filename in glob.glob("tennis_atp-master/*.csv"):
             tourney_date = row[TOURNEY_DATE]
             tourney_key = (tourney_name, tourney_date)
             if (tourney_key not in tourneys):
-                tourney_id = createID('t', tourney_key, tourneys)
+                tourney_id = createID('T', tourney_key, tourneys)
                 insertTourney(tourney_id, row[TOURNEY_NAME],
                               row[TOURNEY_LEVEL], row[TOURNEY_DATE])
             # Matches
             match_key = (tourney_name, winner_name, loser_name)
             if (match_key not in matches):
-                match_num = createID('m', match_key, matches)
+                match_num = createID('M', match_key, matches)
                 insertMatchInfo(
                     match_num, tourney_id, row[SURFACE], row[SCORE], row[BEST_OF])
             # Plays
