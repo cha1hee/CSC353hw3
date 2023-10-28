@@ -93,9 +93,7 @@ def convertDate(date):
 
 def createID(entity_first_letter, key, entity_ids_map):
     if len(entity_ids_map) != 0:
-        last_key = list(entity_ids_map.keys())[-1]
-        last_id = entity_ids_map.get(last_key)
-        new_id = int(last_id[1:len(last_id)]) + 1
+        new_id = len(entity_ids_map) + 1
     else:
         new_id = 1
     entity_ids_map[key] = entity_first_letter + str(new_id)
