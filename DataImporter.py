@@ -77,11 +77,11 @@ connection = mysql.connector.connect(
 cursor = connection.cursor()
 
 # map for player id's
-players = set()
+players = map()
 # map for match id's
-matches = set()
+matches = map()
 # map for tourney id's
-tourneys = set()
+tourneys = map()
 
 
 def insertPlayer(name, country, hand, height):
@@ -98,6 +98,7 @@ def insertPlayer(name, country, hand, height):
     # check execute statement!
     cursor.execute(query_string, (name, country, hand, height))
 
+
 def insertTourney(name, level, date):
     # either convert the date here or in the for loop. remember to change the type in the query string!
     query_string = "INSERT INTO tournament(name, tourn_level, tourn_date) VALUES (%s, %s, %s)"
@@ -110,7 +111,21 @@ def insertTourney(name, level, date):
 
     # check execute statement!
     cursor.execute(query_string, (name, level, date))
-    
+
+
+def insertMatchInfo():
+    query_string = "INSERT INTO tournament(name, tourn_level, tourn_date) VALUES (%s, %s, %s)"
+    if name == '':
+        name = None
+    if level == '':
+        level = None
+    if date == '':
+        date = None
+
+    # check execute statement!
+    cursor.execute(query_string, (name, level, date))
+
+
 def insertPlays(match_num, player_id, win_or_lose, ace, df, fstIn):
     query_string = "INSERT INTO plays(match_num, player_id, win_or_lose, ace, df, fstIn) VALUES (%s, %s, %s, %s, %s, %s)"
     if match_num == '':
@@ -125,16 +140,22 @@ def insertPlays(match_num, player_id, win_or_lose, ace, df, fstIn):
         df = None
     if fstIn == '':
         fstIn = None
-    
 
     # check execute statement!
     cursor.execute(query_string, (name, level, date))
-    
+
+
 def convertDate(date):
     year = date[0:3]
     day = date_split[0] + date_split[1]
-    return datetime.datetime.strptime(day, ‘%B %d %Y’).strftime(‘%Y-%m-%d’)
+    return datetime.datetime.strptime(day, ‘% B % d % Y’).strftime(‘% Y-%m-%d’)
 # figure out how to convert into actual data based on the data we have here
+
+
+def createID(mapID):
+    last_key = list(mapID)[-1]
+    idNum = int(last_key[1:len(last_key)]) + 1
+    return lastKey[0] + idNum
 
 
 longestname = 0
@@ -164,7 +185,8 @@ for filename in glob.glob("tennis_atp-master/*.csv"):
             tourney_date = row[TOURNEY_DATE]
             tourney_key = (tourney_name, tourney_date)
             if (tourney_key not in tourneys):
-                insertTourney(row[TOURNEY_NAME], row[TOURNEY_LEVEL], row[TOURNEY_DATE])
+                insertTourney(row[TOURNEY_NAME],
+                              row[TOURNEY_LEVEL], row[TOURNEY_DATE])
                 tourneys.add(tourney_key)
         i += 1
     connection.commit()

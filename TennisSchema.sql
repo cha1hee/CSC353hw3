@@ -14,7 +14,7 @@ CREATE TABLE player
 
 DROP TABLE IF EXISTS tournament;
 CREATE TABLE tournament
-	(id				VARCHAR(12),
+	(id MEDIUMINT NOT NULL AUTO_INCREMENT,
 	 name			VARCHAR(20),
 	 tourn_level	VARCHAR(3),
 	 tourn_date		DATE,
@@ -23,8 +23,8 @@ CREATE TABLE tournament
 
 DROP TABLE IF EXISTS matchinfo;
 CREATE TABLE matchinfo
-	(match_num		VARCHAR(1),
-	 tourney_id		VARCHAR(1),
+	(match_num MEDIUMINT NOT NULL AUTO_INCREMENT,
+	 tourney_id		VARCHAR(),
 	 surface		VARCHAR(1),
 	 score			VARCHAR(1),
 	 num_sets		VARCHAR(1),
