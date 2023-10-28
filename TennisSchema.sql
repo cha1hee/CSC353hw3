@@ -15,7 +15,7 @@ CREATE TABLE player
 DROP TABLE IF EXISTS tournament;
 CREATE TABLE tournament
 	(id				VARCHAR(6),
-	 name			VARCHAR(10),
+	 name			VARCHAR(40),
 	 tourn_level	VARCHAR(2),
 	 tourn_date		DATE,
 	 PRIMARY KEY (id)
@@ -26,7 +26,7 @@ CREATE TABLE matchinfo
 	(match_num		VARCHAR(6),
 	 tourney_id		VARCHAR(6),
 	 surface		VARCHAR(5),
-	 score			VARCHAR(20),
+	 score			VARCHAR(30),
 	 num_sets		VARCHAR(1),
 	 PRIMARY KEY(match_num, tourney_id),
 	 FOREIGN KEY (tourney_id) REFERENCES tournament (id)
@@ -39,7 +39,7 @@ CREATE TABLE plays
 	 winorlose		VARCHAR(1),
 	 ace			NUMERIC(2),
 	 df				NUMERIC(2),
-	 fstIn			NUMERIC(2),
+	 fstIn			INT(2),
 	 PRIMARY KEY(match_num, player_id),
 	 FOREIGN KEY (match_num) REFERENCES matchinfo (match_num),
 	 FOREIGN KEY (player_id) REFERENCES player (id)

@@ -94,12 +94,7 @@ def convertDate(date):
 
 
 def createID(strHint, key, mapID):
-    if mapID:
-        last_key = list(mapID.keys())[-1]
-        last_id = mapID.get(last_key)
-        idNum = int(last_id[1:len(last_id)]) + 1
-    else:
-        idNum = 1
+    idNum = len(mapID)+1
     mapID[key] = strHint + str(idNum)
     return strHint + str(idNum)
 
