@@ -142,8 +142,6 @@ def insertMatchInfo(match_num, tourney_id, surface, score, num_sets):
         score = None
     if num_sets == '':
         num_sets = None
-
-    # check execute statement!
     cursor.execute(query_string, (match_num, tourney_id,
                    surface, score, num_sets))
 
@@ -162,8 +160,6 @@ def insertPlays(match_num, player_id, win_or_lose, ace, df, fstIn):
         df = None
     if fstIn == '':
         fstIn = None
-
-    # check execute statement!
     cursor.execute(query_string, (match_num, player_id,
                    win_or_lose, ace, df, fstIn))
 
