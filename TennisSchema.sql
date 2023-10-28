@@ -4,7 +4,7 @@ USE tennishw3;
 
 DROP TABLE IF EXISTS player;
 CREATE TABLE player
-	(id MEDIUMINT NOT NULL AUTO_INCREMENT,
+	(id 		VARCHAR(6),
 	 name		VARCHAR(33),
 	 country	VARCHAR(3),
 	 hand		VARCHAR(1),
@@ -14,19 +14,19 @@ CREATE TABLE player
 
 DROP TABLE IF EXISTS tournament;
 CREATE TABLE tournament
-	(id MEDIUMINT NOT NULL AUTO_INCREMENT,
-	 name			VARCHAR(20),
-	 tourn_level	VARCHAR(3),
+	(id				VARCHAR(6),
+	 name			VARCHAR(10),
+	 tourn_level	VARCHAR(2),
 	 tourn_date		DATE,
 	 PRIMARY KEY (id)
 	);
 
 DROP TABLE IF EXISTS matchinfo;
 CREATE TABLE matchinfo
-	(match_num MEDIUMINT NOT NULL AUTO_INCREMENT,
-	 tourney_id		VARCHAR(),
-	 surface		VARCHAR(1),
-	 score			VARCHAR(1),
+	(match_num		VARCHAR(6),
+	 tourney_id		VARCHAR(6),
+	 surface		VARCHAR(5),
+	 score			VARCHAR(20),
 	 num_sets		VARCHAR(1),
 	 PRIMARY KEY(match_num, tourney_id),
 	 FOREIGN KEY (tourney_id) REFERENCES tournament (id)
@@ -34,12 +34,12 @@ CREATE TABLE matchinfo
 
 DROP TABLE IF EXISTS plays;
 CREATE TABLE plays
-	(match_num		VARCHAR(1),
-	 player_id		MEDIUMINT,
-	 win_or_lose	VARCHAR(1),
-	 ace			NUMERIC(1),
-	 df				NUMERIC(1),
-	 fstIn			NUMERIC(1),
+	(match_num		VARCHAR(6),
+	 player_id		VARCHAR(6),
+	 winorlose		VARCHAR(1),
+	 ace			NUMERIC(2),
+	 df				NUMERIC(2),
+	 fstIn			NUMERIC(2),
 	 PRIMARY KEY(match_num, player_id),
 	 FOREIGN KEY (match_num) REFERENCES matchinfo (match_num),
 	 FOREIGN KEY (player_id) REFERENCES player (id)

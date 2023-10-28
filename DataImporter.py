@@ -20,6 +20,7 @@ import os
 import glob
 import csv
 import datetime
+import calendar
 
 TOURNEY_ID = 0
 TOURNEY_NAME = 1
@@ -77,19 +78,34 @@ connection = mysql.connector.connect(
 cursor = connection.cursor()
 
 # map for player id's
-players = map()
+players = {}
 # map for match id's
-matches = map()
+matches = {}
 # map for tourney id's
-tourneys = map()
+tourneys = {}
 
 
 def convertDate(date):
-    return datetime.datetime.strptime(date, '%Y %m %d').strftime('%Y-%m-%d')
+    year = date[0:4]
+    month = calendar.month_name[int(date[4:6])] + ' '
+    dateDay = date[6:8] + ' '
+    day = month + dateDay + year
+    return datetime.datetime.strptime(day, '%B %d %Y').strftime('%Y-%m-%d')
 
 
-def insertPlayer(name, country, hand, height):
-    query_string = "INSERT INTO player(name, country, hand, height) VALUES (%s, %s, %s, %s)"
+def createID(strHint, key, mapID):
+    if mapID:
+        last_key = list(mapID.keys())[-1]
+        last_id = mapID.get(last_key)
+        idNum = int(last_id[1:len(last_id)]) + 1
+    else:
+        idNum = 1
+    mapID[key] = strHint + str(idNum)
+    return strHint + str(idNum)
+
+
+def insertPlayer(id, name, country, hand, height):
+    query_string = "INSERT INTO player VALUES (%s, %s, %s, %s, %s)"
     if name == '':
         name = None
     if country == '':
@@ -98,11 +114,11 @@ def insertPlayer(name, country, hand, height):
         hand = None
     if height == '':
         height = None
-    cursor.execute(query_string, (name, country, hand, height))
+    cursor.execute(query_string, (id, name, country, hand, height))
 
 
-def insertTourney(name, level, date):
-    query_string = "INSERT INTO tournament(name, tourn_level, tourn_date) VALUES (%s, %s, %s)"
+def insertTourney(id, name, level, date):
+    query_string = "INSERT INTO tournament VALUES (%s, %s, %s, %s)"
     if name == '':
         name = None
     if level == '':
@@ -111,24 +127,29 @@ def insertTourney(name, level, date):
         date = None
     else:
         date = convertDate(date)
-    cursor.execute(query_string, (name, level, date))
+    cursor.execute(query_string, (id, name, level, date))
 
 
-def insertMatchInfo():
-    query_string = "INSERT INTO tournament(name, tourn_level, tourn_date) VALUES (%s, %s, %s)"
-    if name == '':
-        name = None
-    if level == '':
-        level = None
-    if date == '':
-        date = None
+def insertMatchInfo(match_num, tourney_id, surface, score, num_sets):
+    query_string = "INSERT INTO matchinfo VALUES (%s, %s, %s, %s, %s)"
+    if match_num == '':
+        match_num = None
+    if tourney_id == '':
+        tourney_id = None
+    if surface == '':
+        surface = None
+    if score == '':
+        score = None
+    if num_sets == '':
+        num_sets = None
 
     # check execute statement!
-    cursor.execute(query_string, (name, level, date))
+    cursor.execute(query_string, (match_num, tourney_id,
+                   surface, score, num_sets))
 
 
 def insertPlays(match_num, player_id, win_or_lose, ace, df, fstIn):
-    query_string = "INSERT INTO plays(match_num, player_id, win_or_lose, ace, df, fstIn) VALUES (%s, %s, %s, %s, %s, %s)"
+    query_string = "INSERT INTO plays VALUES (%s, %s, %s, %s, %s, %s)"
     if match_num == '':
         match_num = None
     if player_id == '':
@@ -143,25 +164,10 @@ def insertPlays(match_num, player_id, win_or_lose, ace, df, fstIn):
         fstIn = None
 
     # check execute statement!
-    cursor.execute(query_string, (name, level, date))
+    cursor.execute(query_string, (match_num, player_id,
+                   win_or_lose, ace, df, fstIn))
 
 
-def convertDate(date):
-    year = date[0:3]
-    day = date_split[0] + date_split[1]
-    return datetime.datetime.strptime(day, ‘% B % d % Y’).strftime(‘% Y-%m-%d’)
-# figure out how to convert into actual data based on the data we have here
-
-    cursor.execute(query_string, (win_or_lose, ace, df, fstIn))
-
-
-def createID(mapID):
-    last_key = list(mapID)[-1]
-    idNum = int(last_key[1:len(last_key)]) + 1
-    return lastKey[0] + idNum
-
-
-longestname = 0
 # for all the files in the csv directory
 for filename in glob.glob("tennis_atp-master/*.csv"):
     file = open(filename)
@@ -174,36 +180,35 @@ for filename in glob.glob("tennis_atp-master/*.csv"):
             winner_height = row[WINNER_HT]
             winner_key = (winner_name, winner_height)
             if (winner_key not in players):
-                insertPlayer(row[WINNER_NAME], row[WINNER_IOC],
+                winner_id = createID('p', winner_key, players)
+                insertPlayer(winner_id, row[WINNER_NAME], row[WINNER_IOC],
                              row[WINNER_HAND], row[WINNER_HT])
-                players.add(winner_key)
             loser_name = row[LOSER_NAME]
             loser_height = row[LOSER_HT]
             loser_key = (loser_name, loser_height)
             if(loser_key not in players):
-                insertPlayer(row[LOSER_NAME], row[LOSER_IOC],
+                loser_id = createID('p', loser_key, players)
+                insertPlayer(loser_id, row[LOSER_NAME], row[LOSER_IOC],
                              row[LOSER_HAND], row[LOSER_HT])
-                players.add(loser_key)
             # Tourney
             tourney_name = row[TOURNEY_NAME]
             tourney_date = row[TOURNEY_DATE]
             tourney_key = (tourney_name, tourney_date)
             if (tourney_key not in tourneys):
-                insertTourney(row[TOURNEY_NAME],
+                tourney_id = createID('t', tourney_key, tourneys)
+                insertTourney(tourney_id, row[TOURNEY_NAME],
                               row[TOURNEY_LEVEL], row[TOURNEY_DATE])
-                tourneys.add(tourney_key)
+            # Matches
+            match_key = (tourney_name, winner_name, loser_name)
+            if (match_key not in matches):
+                match_num = createID('m', match_key, matches)
+                insertMatchInfo(
+                    match_num, tourney_id, row[SURFACE], row[SCORE], row[BEST_OF])
             # Plays
-            plays_key = (winner_key, match_key)
-            if (plays_key not in plays):
-                # what do we do about the Player ID & match number/ID???
-                insertPlays(row[MATCH_NUM], row[WINNER_ID], 'W',
-                            row[W_ACE], row[W_DF], row[W_1STIN])
-                plays.add(plays_key)
-            plays_key = (loser_key, match_key)
-            if (plays_key not in plays):
-                insertPlayer(row[MATCH_NUM], row[LOSER_ID], 'L',
-                             row[L_ACE], row[L_DF], row[L_1STIN])
-                plays.add(plays_key)
+            insertPlays(match_num, winner_id, 'W',
+                        row[W_ACE], row[W_DF], row[W_1STIN])
+            insertPlays(match_num, loser_id, 'L',
+                        row[L_ACE], row[L_DF], row[L_1STIN])
         i += 1
     connection.commit()
     file.close()
