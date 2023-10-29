@@ -81,6 +81,7 @@ cursor = connection.cursor()
 players = {}
 matches = {}
 tourneys = {}
+plays = {}
 
 
 def convertDate(date):
@@ -163,6 +164,9 @@ def insertPlays(match_num, player_id, win_or_lose, ace, df, fstIn):
 
 
 # for all the files in the csv directory
+filenum = 0
+winner = 0
+loser = 0
 for filename in glob.glob("tennis_atp-master/*.csv"):
     file = open(filename)
     csvreader = csv.reader(file)
@@ -177,6 +181,8 @@ for filename in glob.glob("tennis_atp-master/*.csv"):
                 winner_id = createID('P', winner_key, players)
                 insertPlayer(winner_id, row[WINNER_NAME], row[WINNER_IOC],
                              row[WINNER_HAND], row[WINNER_HT])
+            else:
+                winner_id = players.get(winner_key)
             loser_name = row[LOSER_NAME]
             loser_height = row[LOSER_HT]
             loser_key = (loser_name, loser_height)
@@ -184,6 +190,8 @@ for filename in glob.glob("tennis_atp-master/*.csv"):
                 loser_id = createID('P', loser_key, players)
                 insertPlayer(loser_id, row[LOSER_NAME], row[LOSER_IOC],
                              row[LOSER_HAND], row[LOSER_HT])
+            else:
+                loser_id = players.get(loser_key)
             # Tourney
             tourney_name = row[TOURNEY_NAME]
             tourney_date = row[TOURNEY_DATE]
@@ -192,21 +200,39 @@ for filename in glob.glob("tennis_atp-master/*.csv"):
                 tourney_id = createID('T', tourney_key, tourneys)
                 insertTourney(tourney_id, row[TOURNEY_NAME],
                               row[TOURNEY_LEVEL], row[TOURNEY_DATE])
+            else:
+                tourney_id = tourneys.get(tourney_key)
             # Matches
             match_key = (tourney_name, winner_name, loser_name)
             if (match_key not in matches):
                 match_num = createID('M', match_key, matches)
                 insertMatchInfo(
                     match_num, tourney_id, row[SURFACE], row[SCORE], row[BEST_OF])
+            else:
+                match_num = matches.get(match_key)
             # Plays
-            insertPlays(match_num, winner_id, 'W',
-                        row[W_ACE], row[W_DF], row[W_1STIN])
-            insertPlays(match_num, loser_id, 'L',
-                        row[L_ACE], row[L_DF], row[L_1STIN])
+            w_plays_key = (match_num, winner_id)
+            if (w_plays_key not in plays):
+                play_id = createID('pl', w_plays_key, plays)
+                insertPlays(match_num, winner_id, 'W',
+                            row[W_ACE], row[W_DF], row[W_1STIN])
+            else:
+                winner += 1
+            l_plays_key = (match_num, loser_id)
+            if (l_plays_key not in plays):
+                play_id = createID('pl', l_plays_key, plays)
+                insertPlays(match_num, loser_id, 'L',
+                            row[L_ACE], row[L_DF], row[L_1STIN])
+            else:
+                loser += 1
         i += 1
     connection.commit()
     file.close()
+    print(filenum)
+    filenum += 1
 cursor.close()
+print('winner: ' + winner)
+print('loser: ' + loser)
 
 
 # # to print first line of csv
