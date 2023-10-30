@@ -74,7 +74,7 @@ LOSER_RANK_POINTS = 48
 
 # Connect to MySQL
 connection = mysql.connector.connect(
-    user='root', host='localhost', database='tennishw3')
+    user='root', password='123456', host='localhost', database='tennishw3')
 cursor = connection.cursor()
 
 # sets to store new IDs for each entity
@@ -89,8 +89,8 @@ plays = set()
 # use auto increment
 # can also concat tourn id and match id from csv
 
-# don't put derived data in the db 
-# don't create 
+# don't put derived data in the db
+# don't create
 
 
 def convertDate(date):
@@ -122,7 +122,6 @@ def insertPlayer(id, name, country, hand, height):
     # could also do:
     # id = cursor.lastrowid
     # return id
-    
 
 
 def insertTourney(id, name, level, date):
@@ -149,7 +148,7 @@ def insertMatchInfo(match_id, tourney_id, surface, score, num_sets):
         score = None
     if num_sets == '':
         num_sets = None
-    
+
     cursor.execute(query_string, (match_id, tourney_id,
                    surface, score, num_sets))
 
@@ -164,7 +163,7 @@ def insertPlays(match_id, player_id, win_or_lose, ace, df, fstIn):
         df = None
     if fstIn == '':
         fstIn = None
-    
+
     cursor.execute(query_string, (match_id, player_id,
                    win_or_lose, ace, df, fstIn))
 
