@@ -74,14 +74,23 @@ LOSER_RANK_POINTS = 48
 
 # Connect to MySQL
 connection = mysql.connector.connect(
-    user='root', password='123456', host='localhost', database='tennishw3')
+    user='root', host='localhost', database='tennishw3')
 cursor = connection.cursor()
 
-# dictionaries to store new IDs for each entity
-players = {}
-matches = {}
-tourneys = {}
-plays = {}
+# sets to store new IDs for each entity
+# we might not even need these tbh... ?? not sure
+players = set()
+matches = set()
+tourneys = set()
+plays = set()
+
+# player & tourn ids are reliable
+# whenever you see a match you never see it again
+# use auto increment
+# can also concat tourn id and match id from csv
+
+# don't put derived data in the db 
+# don't create 
 
 
 def convertDate(date):
@@ -109,9 +118,11 @@ def insertPlayer(id, name, country, hand, height):
     if height == '':
         height = None
 
-    # print("player ", id, name, country, hand, height)
-
     cursor.execute(query_string, (id, name, country, hand, height))
+    # could also do:
+    # id = cursor.lastrowid
+    # return id
+    
 
 
 def insertTourney(id, name, level, date):
@@ -125,14 +136,11 @@ def insertTourney(id, name, level, date):
     else:
         date = convertDate(date)
 
-    # print("tourney ", id, name, level, date)
     cursor.execute(query_string, (id, name, level, date))
 
 
-def insertMatchInfo(match_num, tourney_id, surface, score, num_sets):
+def insertMatchInfo(match_id, tourney_id, surface, score, num_sets):
     query_string = "INSERT INTO matchinfo VALUES (%s, %s, %s, %s, %s)"
-    if match_num == '':
-        match_num = None
     if tourney_id == '':
         tourney_id = None
     if surface == '':
@@ -141,16 +149,13 @@ def insertMatchInfo(match_num, tourney_id, surface, score, num_sets):
         score = None
     if num_sets == '':
         num_sets = None
-    cursor.execute(query_string, (match_num, tourney_id,
+    
+    cursor.execute(query_string, (match_id, tourney_id,
                    surface, score, num_sets))
 
 
-def insertPlays(match_num, player_id, win_or_lose, ace, df, fstIn):
+def insertPlays(match_id, player_id, win_or_lose, ace, df, fstIn):
     query_string = "INSERT INTO plays VALUES (%s, %s, %s, %s, %s, %s)"
-    if match_num == '':
-        match_num = None
-    if player_id == '':
-        player_id = None
     if win_or_lose == '':
         win_or_lose = None
     if ace == '':
@@ -159,7 +164,8 @@ def insertPlays(match_num, player_id, win_or_lose, ace, df, fstIn):
         df = None
     if fstIn == '':
         fstIn = None
-    cursor.execute(query_string, (match_num, player_id,
+    
+    cursor.execute(query_string, (match_id, player_id,
                    win_or_lose, ace, df, fstIn))
 
 
@@ -174,65 +180,68 @@ for filename in glob.glob("tennis_atp-master/*.csv"):
     for row in csvreader:
         if i != 0:
             # Player
-            winner_name = row[WINNER_NAME]
-            winner_height = row[WINNER_HT]
-            winner_key = (winner_name, winner_height)
-            if (winner_key not in players):
-                winner_id = createID('P', winner_key, players)
+            winner_id = row[WINNER_ID]
+            # winner_name = row[WINNER_NAME]
+            # winner_height = row[WINNER_HT]
+            # winner_key = (winner_name, winner_height)
+            if (winner_id not in players):
+                # winner_id = createID('P', winner_key, players)
                 insertPlayer(winner_id, row[WINNER_NAME], row[WINNER_IOC],
                              row[WINNER_HAND], row[WINNER_HT])
-            else:
-                winner_id = players.get(winner_key)
-            loser_name = row[LOSER_NAME]
-            loser_height = row[LOSER_HT]
-            loser_key = (loser_name, loser_height)
-            if(loser_key not in players):
-                loser_id = createID('P', loser_key, players)
+                players.add(winner_id)
+            # else:
+            #     winner_id = players.get(winner_key)
+            loser_id = row[LOSER_ID]
+            # loser_name = row[LOSER_NAME]
+            # loser_height = row[LOSER_HT]
+            # loser_key = (loser_name, loser_height)
+            if(loser_id not in players):
+                # loser_id = createID('P', loser_key, players)
                 insertPlayer(loser_id, row[LOSER_NAME], row[LOSER_IOC],
                              row[LOSER_HAND], row[LOSER_HT])
-            else:
-                loser_id = players.get(loser_key)
+                players.add(loser_id)
+                # loser_id = insertPlayer(...)
+                # players[loser_key] = loser_id
+            # else:
+            #     loser_id = players.get(loser_key)
             # Tourney
-            tourney_name = row[TOURNEY_NAME]
-            tourney_date = row[TOURNEY_DATE]
-            tourney_key = (tourney_name, tourney_date)
-            if (tourney_key not in tourneys):
-                tourney_id = createID('T', tourney_key, tourneys)
+            tourney_id = row[TOURNEY_ID]
+            # tourney_name = row[TOURNEY_NAME]
+            # tourney_date = row[TOURNEY_DATE]
+            # tourney_key = (tourney_name, tourney_date)
+            if (tourney_id not in tourneys):
+                # tourney_id = createID('T', tourney_key, tourneys)
                 insertTourney(tourney_id, row[TOURNEY_NAME],
                               row[TOURNEY_LEVEL], row[TOURNEY_DATE])
-            else:
-                tourney_id = tourneys.get(tourney_key)
+                tourneys.add(tourney_id)
+            # else:
+            #     tourney_id = tourneys.get(tourney_key)
             # Matches
-            match_key = (tourney_name, winner_name, loser_name)
-            if (match_key not in matches):
-                match_num = createID('M', match_key, matches)
+            match_id = tourney_id + row[MATCH_NUM]
+            if (match_id not in matches):
+                # match_num = createID('M', match_key, matches)
                 insertMatchInfo(
-                    match_num, tourney_id, row[SURFACE], row[SCORE], row[BEST_OF])
-            else:
-                match_num = matches.get(match_key)
+                    match_id, tourney_id, row[SURFACE], row[SCORE], row[BEST_OF])
+                matches.add(match_id)
+            # else:
+            #     match_num = matches.get(match_key)
             # Plays
-            w_plays_key = (match_num, winner_id)
+            w_plays_key = (match_id, winner_id)
             if (w_plays_key not in plays):
-                play_id = createID('pl', w_plays_key, plays)
-                insertPlays(match_num, winner_id, 'W',
+                insertPlays(match_id, winner_id, 'W',
                             row[W_ACE], row[W_DF], row[W_1STIN])
-            else:
-                winner += 1
-            l_plays_key = (match_num, loser_id)
+                plays.add(w_plays_key)
+            l_plays_key = (match_id, loser_id)
             if (l_plays_key not in plays):
-                play_id = createID('pl', l_plays_key, plays)
-                insertPlays(match_num, loser_id, 'L',
+                insertPlays(match_id, loser_id, 'L',
                             row[L_ACE], row[L_DF], row[L_1STIN])
-            else:
-                loser += 1
+                plays.add(l_plays_key)
         i += 1
     connection.commit()
     file.close()
     print(filenum)
     filenum += 1
 cursor.close()
-print('winner: ' + winner)
-print('loser: ' + loser)
 
 
 # # to print first line of csv
