@@ -29,7 +29,7 @@ CREATE TABLE matchinfo
 	 score			VARCHAR(50),
 	 num_sets		VARCHAR(1),
 	 PRIMARY KEY(match_id, tourney_id),
-	 FOREIGN KEY (tourney_id) REFERENCES tournament (id)
+	 FOREIGN KEY (tourney_id) REFERENCES tournament (id) ON DELETE CASCADE
 	);
 
 DROP TABLE IF EXISTS plays;
@@ -42,6 +42,6 @@ CREATE TABLE plays
 	 fstIn			INT(3),
 	 PRIMARY KEY(match_id, player_id),
 	 FOREIGN KEY (match_id) REFERENCES matchinfo (match_id),
-	 FOREIGN KEY (player_id) REFERENCES player (id)
+	 FOREIGN KEY (player_id) REFERENCES player (id) ON DELETE SET NULL
 	);
 	
