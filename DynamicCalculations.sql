@@ -1,32 +1,21 @@
-DROP FUNCTION IF EXISTS dept_countF;
+DROP FUNCTION IF EXISTS aceCount;
 DELIMITER //
-CREATE FUNCTION dept_countF(dept_name VARCHAR(20)) RETURNS INTEGER READS SQL DATA
+CREATE FUNCTION aceCount(name VARCHAR(20), startDate DATE, finishDate DATE) RETURNS DOUBLE READS SQL DATA
 BEGIN
-DECLARE dcount INT;
+DECLARE aceAVG DOUBLE;
 -- Setting dcount (exhibit A)
-SET dcount = (SELECT COUNT(*)
-FROM instructor
-WHERE instructor.dept_name = dept_name);
--- Setting dcount (exhibit B)
-SELECT COUNT(*) INTO dcount
-FROM instructor
-WHERE instructor.dept_name = dept_name;
-RETURN dcount;
+SET aceAVG = (SELECT AVG(plays.ace)
+FROM plays, tournament, matchinfo, player
+WHERE plays.player_id = player.id
+AND plays.match_id = matchinfo.match_id 
+AND matchinfo.tourney_id = tournament.id
+AND player.name = name
+AND tournament.tourn_date > startDate
+AND tournament.tourn_date < finishDate
+GROUP BY player.name);
+RETURN aceAVG;
 END
 //
 DELIMITER ;
-SELECT dept_countF(‘History’); -- should output 2
-SET @historyCount = dept_countF(‘History’);
-SELECT @historyCount; -- should also output 2
-DROP PROCEDURE IF EXISTS dept_countP;
-DELIMITER //
-CREATE PROCEDURE dept_countP(IN dept_name VARCHAR(20), OUT dcount INT)
-BEGIN
-SELECT COUNT(*) INTO dcount
-FROM instructor
-WHERE instructor.dept_name = dept_name;
-END
-//
-DELIMITER ;
-CALL dept_countP(‘History’, @xyz);
-SELECT @xyz; -- should output 2
+SELECT aceCount('Taylor Fritz', '1968-11-21', '2023-08-11'); -- should output 2
+
