@@ -18,6 +18,7 @@ RETURN aceAVG;
 END
 //
 DELIMITER ;
+-- tested with:
 SELECT aceCount('Taylor Fritz', '1968-11-21', '2023-08-11'); -- should output 2
 
 
@@ -45,6 +46,20 @@ END
 DELIMITER ;
 -- tested with:
 CALL showAggregateStatistics('Taylor Fritz', '1968-11-21', '2023-01-02');
+
+-- QUESTION # 3: TopAces
+CREATE OR REPLACE VIEW TopAces AS
+SELECT nameAndAvg.name FROM (SELECT player.name, AVG(plays.ace) AS playerAces
+	FROM plays, tournament, matchinfo, player
+		WHERE plays.player_id = player.id
+			AND plays.match_id = matchinfo.match_id 
+			AND matchinfo.tourney_id = tournament.id
+		GROUP BY player.name
+	ORDER BY playerAces DESC
+	LIMIT 10) AS nameAndAvg;
+
+
+
 
 -- FOR TESTING PURPOSES
 -- test procedure (just displays all data for the person within selected date range)
