@@ -74,7 +74,7 @@ LOSER_RANK_POINTS = 48
 
 # Connect to MySQL
 connection = mysql.connector.connect(
-    user='root', password='123456', host='localhost', database='tennishw3')
+    user='root', host='localhost', database='tennishw3')
 cursor = connection.cursor()
 
 # sets to store new IDs for each entity
@@ -153,8 +153,8 @@ def insertMatchInfo(match_id, tourney_id, surface, score, num_sets):
                    surface, score, num_sets))
 
 
-def insertPlays(match_id, player_id, win_or_lose, ace, df, fstIn):
-    query_string = "INSERT INTO plays VALUES (%s, %s, %s, %s, %s, %s)"
+def insertPlays(match_id, player_id, win_or_lose, ace, df, fstIn, first_won, second_won):
+    query_string = "INSERT INTO plays VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
     if win_or_lose == '':
         win_or_lose = None
     if ace == '':
@@ -163,9 +163,14 @@ def insertPlays(match_id, player_id, win_or_lose, ace, df, fstIn):
         df = None
     if fstIn == '':
         fstIn = None
+    if first_won == '':
+        first_won = None
+    if second_won == '':
+        second_won = None
+    
 
     cursor.execute(query_string, (match_id, player_id,
-                   win_or_lose, ace, df, fstIn))
+                   win_or_lose, ace, df, fstIn, first_won, second_won))
 
 
 # for all the files in the csv directory
@@ -228,12 +233,12 @@ for filename in glob.glob("tennis_atp-master/*.csv"):
             w_plays_key = (match_id, winner_id)
             if (w_plays_key not in plays):
                 insertPlays(match_id, winner_id, 'W',
-                            row[W_ACE], row[W_DF], row[W_1STIN])
+                            row[W_ACE], row[W_DF], row[W_1STIN], row[W_1STWON], row[W_2NDWON])
                 plays.add(w_plays_key)
             l_plays_key = (match_id, loser_id)
             if (l_plays_key not in plays):
                 insertPlays(match_id, loser_id, 'L',
-                            row[L_ACE], row[L_DF], row[L_1STIN])
+                            row[L_ACE], row[L_DF], row[L_1STIN], row[L_1STWON], row[L_2NDWON])
                 plays.add(l_plays_key)
         i += 1
     connection.commit()
