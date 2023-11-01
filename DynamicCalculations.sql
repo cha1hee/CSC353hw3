@@ -73,3 +73,24 @@ END
 //
 DELIMITER ;
 CALL testAggregateStatistics('Taylor Fritz', '1968-11-21', '2023-01-02');
+
+
+
+DROP TRIGGER IF EXISTS onInsertionPlayer;
+DELIMITER //
+CREATE TRIGGER onInsertionPlayer BEFORE INSERT ON player
+BEGIN
+	IF NEW.country = 'RUS' OR NEW.country = 'EST' THEN
+	-- INSERT INTO player SET NEW.country = 'USR';
+	SET NEW.country = 'USR';
+	-- WHERE player.country = 'RUS' OR player.country = 'EST';
+	-- NEW.country = 'USR';
+	-- CALL updateCountry(NEW.country);
+	END IF;
+END
+//
+DELIMITER ;
+
+INSERT INTO player VALUES ('9999127', 'Test Player', 'RUS', 'R', '56');
+
+SELECT * FROM player WHERE player.country = 'USR';
