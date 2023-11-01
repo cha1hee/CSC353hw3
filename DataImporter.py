@@ -168,7 +168,6 @@ def insertPlays(match_id, player_id, win_or_lose, ace, df, fstIn, first_won, sec
     if second_won == '':
         second_won = None
     
-
     cursor.execute(query_string, (match_id, player_id,
                    win_or_lose, ace, df, fstIn, first_won, second_won))
 
