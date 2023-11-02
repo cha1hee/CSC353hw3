@@ -12,7 +12,7 @@
 # we can connect directly to dbeaver
 # python only imports the data!!
 
-# Kate Hynes and Pauline Cha read chapters 1-3 of the textbook
+# Kate Hynes and Pauline Cha
 
 # Install with pip install mysql-connector-python (on some systems 'pip' might be called 'pip3')
 import mysql.connector
@@ -101,12 +101,6 @@ def convertDate(date):
     return datetime.datetime.strptime(formatted_date, '%B %d %Y').strftime('%Y-%m-%d')
 
 
-def createID(entity_first_letter, key, entity_ids_map):
-    new_id = len(entity_ids_map) + 1
-    entity_ids_map[key] = entity_first_letter + str(new_id)
-    return entity_first_letter + str(new_id)
-
-
 def insertPlayer(id, name, country, hand, height):
     query_string = "INSERT INTO player VALUES (%s, %s, %s, %s, %s)"
     if name == '':
@@ -117,11 +111,10 @@ def insertPlayer(id, name, country, hand, height):
         hand = None
     if height == '':
         height = None
-
-    cursor.execute(query_string, (id, name, country, hand, height))
-    # could also do:
-    # id = cursor.lastrowid
-    # return id
+    try:
+        cursor.execute(query_string, (id, name, country, hand, height))
+    except mysql.connector.Error as error_descriptor:
+        print("Failed inserting tuple: {}".format(error_descriptor))
 
 
 def insertTourney(id, name, level, date):
@@ -134,8 +127,10 @@ def insertTourney(id, name, level, date):
         date = None
     else:
         date = convertDate(date)
-
-    cursor.execute(query_string, (id, name, level, date))
+    try:
+        cursor.execute(query_string, (id, name, level, date))
+    except mysql.connector.Error as error_descriptor:
+        print("Failed inserting tuple: {}".format(error_descriptor))
 
 
 def insertMatchInfo(match_id, tourney_id, surface, score, num_sets):
@@ -148,9 +143,11 @@ def insertMatchInfo(match_id, tourney_id, surface, score, num_sets):
         score = None
     if num_sets == '':
         num_sets = None
-
-    cursor.execute(query_string, (match_id, tourney_id,
+    try:
+        cursor.execute(query_string, (match_id, tourney_id,
                    surface, score, num_sets))
+    except mysql.connector.Error as error_descriptor:
+        print("Failed inserting tuple: {}".format(error_descriptor))
 
 
 def insertPlays(match_id, player_id, win_or_lose, ace, df, fstIn, first_won, second_won):
@@ -167,15 +164,22 @@ def insertPlays(match_id, player_id, win_or_lose, ace, df, fstIn, first_won, sec
         first_won = None
     if second_won == '':
         second_won = None
-    
-    cursor.execute(query_string, (match_id, player_id,
+    try:
+        cursor.execute(query_string, (match_id, player_id,
                    win_or_lose, ace, df, fstIn, first_won, second_won))
-
+    except mysql.connector.Error as error_descriptor:
+        print("Failed inserting tuple: {}".format(error_descriptor))
 
 # for all the files in the csv directory
-filenum = 0
-winner = 0
-loser = 0
+# filenum = 0
+# winner = 0
+# loser = 0
+# match_id_len = 0
+# longest_match_id = ''
+# tourney_id_len = 0
+# longest_tourney_id = ''
+# score_len = 0
+# longest_score = ''
 for filename in glob.glob("tennis_atp-master/*.csv"):
     file = open(filename)
     csvreader = csv.reader(file)
@@ -184,50 +188,36 @@ for filename in glob.glob("tennis_atp-master/*.csv"):
         if i != 0:
             # Player
             winner_id = row[WINNER_ID]
-            # winner_name = row[WINNER_NAME]
-            # winner_height = row[WINNER_HT]
-            # winner_key = (winner_name, winner_height)
             if (winner_id not in players):
-                # winner_id = createID('P', winner_key, players)
                 insertPlayer(winner_id, row[WINNER_NAME], row[WINNER_IOC],
                              row[WINNER_HAND], row[WINNER_HT])
                 players.add(winner_id)
-            # else:
-            #     winner_id = players.get(winner_key)
             loser_id = row[LOSER_ID]
-            # loser_name = row[LOSER_NAME]
-            # loser_height = row[LOSER_HT]
-            # loser_key = (loser_name, loser_height)
             if(loser_id not in players):
-                # loser_id = createID('P', loser_key, players)
                 insertPlayer(loser_id, row[LOSER_NAME], row[LOSER_IOC],
                              row[LOSER_HAND], row[LOSER_HT])
                 players.add(loser_id)
-                # loser_id = insertPlayer(...)
-                # players[loser_key] = loser_id
-            # else:
-            #     loser_id = players.get(loser_key)
             # Tourney
             tourney_id = row[TOURNEY_ID]
-            # tourney_name = row[TOURNEY_NAME]
-            # tourney_date = row[TOURNEY_DATE]
-            # tourney_key = (tourney_name, tourney_date)
+            # if (len(tourney_id) > tourney_id_len):
+            #     tourney_id_len = len(tourney_id)
+            #     longest_tourney_id = tourney_id
             if (tourney_id not in tourneys):
-                # tourney_id = createID('T', tourney_key, tourneys)
                 insertTourney(tourney_id, row[TOURNEY_NAME],
                               row[TOURNEY_LEVEL], row[TOURNEY_DATE])
                 tourneys.add(tourney_id)
-            # else:
-            #     tourney_id = tourneys.get(tourney_key)
             # Matches
             match_id = tourney_id + row[MATCH_NUM]
+            # if (len(match_id) > match_id_len):
+            #     match_id_len = len(match_id)
+            #     longest_match_id = match_id
+            # if (len(row[SCORE]) > score_len):
+            #     score_len = len(row[SCORE])
+            #     longest_score = row[SCORE]
             if (match_id not in matches):
-                # match_num = createID('M', match_key, matches)
                 insertMatchInfo(
                     match_id, tourney_id, row[SURFACE], row[SCORE], row[BEST_OF])
                 matches.add(match_id)
-            # else:
-            #     match_num = matches.get(match_key)
             # Plays
             w_plays_key = (match_id, winner_id)
             if (w_plays_key not in plays):
@@ -242,13 +232,15 @@ for filename in glob.glob("tennis_atp-master/*.csv"):
         i += 1
     connection.commit()
     file.close()
-    print(filenum)
-    filenum += 1
+    # print(filenum)
+    # filenum += 1
 cursor.close()
+# print("match id longest ", match_id_len, "tourney id longest ", tourney_id_len, "score longest ", score_len)
+# print("match id longest ", longest_match_id, "tourney id longest ", longest_tourney_id, "score longest ", longest_score)
 
 
-# # to print first line of csv
-# file = open('tennis_atp-master/atp_matches_1968.csv')
+# # # to print first line of csv
+# # file = open('tennis_atp-master/atp_matches_1968.csv')
 # csvreader = csv.reader(file)
 # row1 = next(csvreader)
 # print(row1)
