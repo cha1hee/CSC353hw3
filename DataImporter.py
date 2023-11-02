@@ -207,7 +207,7 @@ for filename in glob.glob("tennis_atp-master/*.csv"):
                               row[TOURNEY_LEVEL], row[TOURNEY_DATE])
                 tourneys.add(tourney_id)
             # Matches
-            match_id = tourney_id + row[MATCH_NUM]
+            match_id = tourney_id + '-' + row[MATCH_NUM]
             # if (len(match_id) > match_id_len):
             #     match_id_len = len(match_id)
             #     longest_match_id = match_id
