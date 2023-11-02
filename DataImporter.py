@@ -74,7 +74,7 @@ LOSER_RANK_POINTS = 48
 
 # Connect to MySQL
 connection = mysql.connector.connect(
-    user='root', host='localhost', database='tennishw3')
+    user='root', password='123456', host='localhost', database='tennishw3')
 cursor = connection.cursor()
 
 # sets to store new IDs for each entity
@@ -167,7 +167,7 @@ def insertPlays(match_id, player_id, win_or_lose, ace, df, fstIn, first_won, sec
         first_won = None
     if second_won == '':
         second_won = None
-    
+
     cursor.execute(query_string, (match_id, player_id,
                    win_or_lose, ace, df, fstIn, first_won, second_won))
 
