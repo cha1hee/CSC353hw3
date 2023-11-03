@@ -18,8 +18,7 @@ RETURN aceAVG;
 END
 //
 DELIMITER ;
--- tested with:
-SELECT aceCount('Taylor Fritz', '1968-11-21', '2023-08-11'); -- should output 2
+-- SELECT aceCount('Taylor Fritz', '1968-11-21', '2023-08-11'); -- should output 2
 
 
 -- QUESTION # 2: showAggregateStatistics
@@ -45,9 +44,21 @@ END
 //
 DELIMITER ;
 -- tested with:
-CALL showAggregateStatistics('Taylor Fritz', '1968-11-21', '2023-01-02');
+-- CALL showAggregateStatistics('Taylor Fritz', '1968-11-21', '2023-01-02');
 
--- QUESTION # 3: TopAces
+-- FOR TESTING PURPOSES
+-- test procedure (just displays all data for the person within selected date range)
+-- DROP PROCEDURE IF EXISTS testAggregateStatistics;
+-- DELIMITER //
+-- BEGIN
+-- SELECT player.name AS name, ace, df, fstIn FROM plays, player, tournament, matchinfo 
+-- WHERE player.id = plays.player_id AND player.name = name AND tournament.tourn_date > start AND tournament.tourn_date < finish AND matchinfo.tourney_id = tournament.id AND plays.match_id = matchinfo.match_id;
+-- END
+-- //
+-- DELIMITER ;
+-- CALL testAggregateStatistics('Taylor Fritz', '1968-11-21', '2023-01-02');
+
+--- QUESTION # 3: TopAces
 CREATE OR REPLACE VIEW TopAces AS
 SELECT nameAndAvg.name FROM (SELECT player.name, AVG(plays.ace) AS playerAces
 	FROM plays, tournament, matchinfo, player
@@ -59,36 +70,31 @@ SELECT nameAndAvg.name FROM (SELECT player.name, AVG(plays.ace) AS playerAces
 	LIMIT 10) AS nameAndAvg;
 
 
-
-
--- FOR TESTING PURPOSES
--- test procedure (just displays all data for the person within selected date range)
-DROP PROCEDURE IF EXISTS testAggregateStatistics;
-DELIMITER //
-CREATE PROCEDURE testAggregateStatistics(IN name VARCHAR(33), start DATE, finish DATE)
-BEGIN
-SELECT player.name AS name, ace, df, fstIn FROM plays, player, tournament, matchinfo 
-WHERE player.id = plays.player_id AND player.name = name AND tournament.tourn_date > start AND tournament.tourn_date < finish AND matchinfo.tourney_id = tournament.id AND plays.match_id = matchinfo.match_id;
-END
-//
-DELIMITER ;
-CALL testAggregateStatistics('Taylor Fritz', '1968-11-21', '2023-01-02');
-
-
-
 DROP TRIGGER IF EXISTS onInsertionPlayer;
 DELIMITER //
 CREATE TRIGGER onInsertionPlayer BEFORE INSERT ON player
 FOR EACH ROW
 BEGIN
-	IF NEW.country = 'RUS' OR NEW.country = 'EST' THEN
+	IF NEW.country = 'RUS' OR 
+	NEW.country = 'EST' OR 
+	NEW.country = 'UKR' OR 
+	NEW.country = 'BLR' OR 
+	NEW.country = 'MDA' OR 
+	NEW.country = 'KAZ' OR 
+	NEW.country = 'LVA' OR 
+	NEW.country = 'LTU' OR 
+	NEW.country = 'KGZ' OR 
+	NEW.country = 'TJK' OR 
+	NEW.country = 'TKM' OR 
+	NEW.country = 'UZB' OR 
+	NEW.country = 'ARM' OR 
+	NEW.country = 'AZE' OR 
+	NEW.country = 'GEO' THEN
 	SET NEW.country = 'USR';
 	END IF;
 END
 //
 DELIMITER ;
 
-INSERT INTO player VALUES ('2', 'Test Player 2', 'RUS', 'R', '56');
-INSERT INTO player VALUES ('1', 'Test Player 1', 'EST', 'R', '60');
 
-SELECT * FROM player WHERE player.country = 'USR';
+

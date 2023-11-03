@@ -208,7 +208,7 @@ for filename in glob.glob("tennis_atp-master/*.csv"):
                               row[TOURNEY_LEVEL], row[TOURNEY_DATE])
                 tourneys.add(tourney_id)
             # Matches
-            match_id = tourney_id + row[MATCH_NUM]
+            match_id = tourney_id + '-' + row[MATCH_NUM]
             # if (len(match_id) > match_id_len):
             #     match_id_len = len(match_id)
             #     longest_match_id = match_id
@@ -220,12 +220,12 @@ for filename in glob.glob("tennis_atp-master/*.csv"):
                     match_id, tourney_id, row[SURFACE], row[SCORE], row[BEST_OF])
                 matches.add(match_id)
             # Plays
-            w_plays_key = match_id + winner_id
+            w_plays_key = len(plays)+1
             if (w_plays_key not in plays):
                 insertPlays(w_plays_key, match_id, winner_id, 'W',
                             row[W_ACE], row[W_DF], row[W_1STIN], row[W_1STWON], row[W_2NDWON])
                 plays.add(w_plays_key)
-            l_plays_key = match_id + loser_id
+            l_plays_key = len(plays)+1
             if (l_plays_key not in plays):
                 insertPlays(l_plays_key, match_id, loser_id, 'L',
                             row[L_ACE], row[L_DF], row[L_1STIN], row[L_1STWON], row[L_2NDWON])
