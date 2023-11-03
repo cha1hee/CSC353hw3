@@ -74,7 +74,7 @@ LOSER_RANK_POINTS = 48
 
 # Connect to MySQL
 connection = mysql.connector.connect(
-    user='root', host='localhost', database='tennishw3')
+    user='root', password='123456', host='localhost', database='tennishw3')
 cursor = connection.cursor()
 
 # sets to store new IDs for each entity
@@ -145,13 +145,13 @@ def insertMatchInfo(match_id, tourney_id, surface, score, num_sets):
         num_sets = None
     try:
         cursor.execute(query_string, (match_id, tourney_id,
-                   surface, score, num_sets))
+                                      surface, score, num_sets))
     except mysql.connector.Error as error_descriptor:
         print("Failed inserting tuple: {}".format(error_descriptor))
 
 
-def insertPlays(match_id, player_id, win_or_lose, ace, df, fstIn, first_won, second_won):
-    query_string = "INSERT INTO plays VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+def insertPlays(plays_id, match_id, player_id, win_or_lose, ace, df, fstIn, first_won, second_won):
+    query_string = "INSERT INTO plays VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
     if win_or_lose == '':
         win_or_lose = None
     if ace == '':
@@ -165,10 +165,11 @@ def insertPlays(match_id, player_id, win_or_lose, ace, df, fstIn, first_won, sec
     if second_won == '':
         second_won = None
     try:
-        cursor.execute(query_string, (match_id, player_id,
-                   win_or_lose, ace, df, fstIn, first_won, second_won))
+        cursor.execute(query_string, (plays_id, match_id, player_id,
+                                      win_or_lose, ace, df, fstIn, first_won, second_won))
     except mysql.connector.Error as error_descriptor:
         print("Failed inserting tuple: {}".format(error_descriptor))
+
 
 # for all the files in the csv directory
 # filenum = 0
@@ -219,14 +220,14 @@ for filename in glob.glob("tennis_atp-master/*.csv"):
                     match_id, tourney_id, row[SURFACE], row[SCORE], row[BEST_OF])
                 matches.add(match_id)
             # Plays
-            w_plays_key = (match_id, winner_id)
+            w_plays_key = len(plays)+1
             if (w_plays_key not in plays):
-                insertPlays(match_id, winner_id, 'W',
+                insertPlays(w_plays_key, match_id, winner_id, 'W',
                             row[W_ACE], row[W_DF], row[W_1STIN], row[W_1STWON], row[W_2NDWON])
                 plays.add(w_plays_key)
-            l_plays_key = (match_id, loser_id)
+            l_plays_key = len(plays)+1
             if (l_plays_key not in plays):
-                insertPlays(match_id, loser_id, 'L',
+                insertPlays(l_plays_key, match_id, loser_id, 'L',
                             row[L_ACE], row[L_DF], row[L_1STIN], row[L_1STWON], row[L_2NDWON])
                 plays.add(l_plays_key)
         i += 1

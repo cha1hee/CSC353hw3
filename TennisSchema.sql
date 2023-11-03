@@ -34,7 +34,8 @@ CREATE TABLE matchinfo
 
 DROP TABLE IF EXISTS plays;
 CREATE TABLE plays
-	(match_id		VARCHAR(37),
+	(play_id		VARCHAR(15),
+	 match_id		VARCHAR(37),
 	 player_id		INT,
 	 win_or_lose	CHAR(1) CHECK(win_or_lose = 'W' OR win_or_lose = 'L'),
 	 ace			INT CHECK(ace >= 0),
@@ -42,7 +43,7 @@ CREATE TABLE plays
 	 fstIn			INT CHECK(fstIn >= 0),
 	 first_won		INT CHECK(first_won >= 0),
 	 second_won		INT CHECK(second_won >= 0),
-	 PRIMARY KEY(match_id, win_or_lose),
-	 FOREIGN KEY (match_id) REFERENCES matchinfo (match_id),
+	 PRIMARY KEY(play_id),
+	 FOREIGN KEY (match_id) REFERENCES matchinfo (match_id) ON DELETE SET NULL,
 	 FOREIGN KEY (player_id) REFERENCES player (id) ON DELETE SET NULL
 	);
