@@ -18,7 +18,6 @@ RETURN aceAVG;
 END
 //
 DELIMITER ;
--- SELECT aceCount('Taylor Fritz', '1968-11-21', '2023-08-11'); -- should output 2
 
 
 -- QUESTION # 2: showAggregateStatistics
@@ -28,9 +27,13 @@ CREATE PROCEDURE showAggregateStatistics(IN name VARCHAR(33), start DATE, finish
 BEGIN
 SELECT 
 	player.name AS name, 
-	AVG(ace) AS aces, 
-	AVG(df) AS double_faults, 
-	AVG(fstIn) AS first_in 
+	AVG(ace) AS avg_aces, 
+	AVG(df) AS avg_double_faults, 
+	AVG(fstIn) AS avg_first_in,
+	AVG(first_won) AS avg_first_won,
+	AVG(second_won) AS avg_second_won,
+	AVG(break_points_saved) AS avg_break_points_saved,
+	AVG(break_points_faced) AS avg_break_points_faced
 		FROM plays, player, tournament, matchinfo 
 			WHERE 
 				player.id = plays.player_id AND 
@@ -43,22 +46,8 @@ SELECT
 END
 //
 DELIMITER ;
--- tested with:
--- CALL showAggregateStatistics('Taylor Fritz', '1968-11-21', '2023-01-02');
 
--- FOR TESTING PURPOSES
--- test procedure (just displays all data for the person within selected date range)
--- DROP PROCEDURE IF EXISTS testAggregateStatistics;
--- DELIMITER //
--- BEGIN
--- SELECT player.name AS name, ace, df, fstIn FROM plays, player, tournament, matchinfo 
--- WHERE player.id = plays.player_id AND player.name = name AND tournament.tourn_date > start AND tournament.tourn_date < finish AND matchinfo.tourney_id = tournament.id AND plays.match_id = matchinfo.match_id;
--- END
--- //
--- DELIMITER ;
--- CALL testAggregateStatistics('Taylor Fritz', '1968-11-21', '2023-01-02');
-
---- QUESTION # 3: TopAces
+-- QUESTION # 3: TopAces
 CREATE OR REPLACE VIEW TopAces AS
 SELECT nameAndAvg.name FROM (SELECT player.name, AVG(plays.ace) AS playerAces
 	FROM plays, tournament, matchinfo, player
